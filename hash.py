@@ -1,5 +1,14 @@
-# Imports
 import bcrypt
+
+# To test this function prior to database implementation, this dictionary will act as the database
+hashed_users = {'gordon.ramsay': '$2b$12$XoYVPnA2R60I8fBQ2P77su2Sd4x1DMkxodHiGUylje.j/dDNF98Cy', 
+                'john.wick': '$2b$12$hSeY5N/C8DzQifNlZRj8VOmMQi.L69Xn3eWDeKVZj37rXvSSM6lTa', 
+                'james.bond': '$2b$12$kW4O23Dtm7ozzBNtBJ5W4Oge4bNo90mDimSeAgkgRpxf4wdMmlK8S'}
+
+# Retrieves user password hash from database based on username
+def get_password_hash(username):
+    """Retrieves password hash for existing users"""
+    return hashed_users.get(username)
 
 # Hashes a password
 def hash_password(password):
@@ -15,34 +24,42 @@ def hash_password(password):
     # Assembling the hash
     hash = bcrypt.hashpw(bytes, salt)
 
-    return hash
+    # Convert bytes hash to a string and return
+    return hash.decode('utf-8')
 
-# Confirms user input against stored password
-def authenticate(user_password, hashed_password):
+# Confirms user password against stored password hash
+def auth_password(password, hash):
     """Authenticates user password"""
 
     # Converts password into bytes
-    bytes = user_password.encode('utf-8')
+    bytes = password.encode('utf-8')
+
+    # Convert hash string to bytes before passing to bcrypt.checkpw()
+    hash_bytes = hash.encode('utf-8')
 
     # Checks user input against hashed password
-    result = bcrypt.checkpw(bytes, hashed_password)
+    result = bcrypt.checkpw(bytes, hash_bytes)
 
     return result
 
-# Tests
-password = "password123"
+# Authenticates user based on database
+def auth_user(username, password):
+    """User Authentication"""
+    hash = get_password_hash(username)
 
-hash = hash_password(password)
-print(hash)
+    if not hash:
+        # If no user with this username exists:
+        print("Username or Password incorrect!")
+        return False
+    
+    if auth_password(password, hash):
+        print("Login successful!")
+        return True
+    else:
+        print("Username or Password incorrect!")
+        return False
 
-# Test with wrong password
-userInput = "password321"
 
-authentication = authenticate(userInput, hash)
-print(authentication)
-
-# Test with correct password
-userInput = "password123"
-
-authentication = authenticate(userInput, hash)
-print(authentication)
+# Test the authentication function
+gordon_authenticate = auth_user('gordon.ramsay', 'lambsauce')
+print(gordon_authenticate)
