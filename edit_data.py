@@ -31,7 +31,7 @@ def add_health_record(astronaut_id, weight, temperature, symptoms, radiation_lev
     connect.commit()
     connect.close()
 
-    print("Record added successfully!")
+    print("\nRecord added successfully!\n")
 
 # Retrieve user id based on username
 def get_id_by_username(username):
@@ -61,7 +61,7 @@ def retrieve_records(astronaut_id):
     if records:
         for record in records:
             record_id, record_date = record
-            print(f"Record ID: {record_id} - Record Date: {record_date}\n")
+            print(f"\nRecord ID: {record_id} - Record Date: {record_date}")
     else:
         print("\nNo records found for this astronaut.")
 
@@ -77,7 +77,7 @@ def retrieve_record_details(astronaut_id, record_id):
     connect.close()
 
     if record:
-        print("Record Details:")
+        print("\nRecord Details:")
         print("--------------")
         print(f"Record ID: {record[0]}")
         print(f"Astronaut ID: {record[1]}")
