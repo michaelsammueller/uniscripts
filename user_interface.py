@@ -4,7 +4,7 @@ import sqlite3
 from login import collect_user_input, register, login
 from edit_data import collect_health_input, add_health_record
 from edit_data import get_id_by_username, retrieve_records, retrieve_record_details, delete_record
-from validation import validate_integer
+from validation import validate_integer, key
 
 connect = sqlite3.connect('data/securespace.db')
 
@@ -63,7 +63,7 @@ def user_menu(username):
         if choice == '1':
             weight, temperature, symptoms, radiation_levels, blood_pressure, record_date = collect_health_input()
             astronaut_id = get_id_by_username(username)
-            add_health_record(astronaut_id, weight, temperature, symptoms, radiation_levels, blood_pressure, record_date)
+            add_health_record(key, astronaut_id, weight, temperature, symptoms, radiation_levels, blood_pressure, record_date)
         elif choice == '2':
             astronaut_id = get_id_by_username(username)
             retrieve_records(astronaut_id)

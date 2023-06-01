@@ -1,31 +1,38 @@
 import sqlite3
+from cryptography.fernet import Fernet
 
 # Imports from other files
-from validation import are_you_sure
+from validation import are_you_sure, encrypt_data, decrypt_data, key
 
 # Function to collect user input for health records
 def collect_health_input():
     # astronaut_id will be assigned via login
-    weight = float(input("Enter Weight: "))
-    temperature = float(input("Enter Temperature (Celcius): "))
+    weight = input("Enter Weight: ")
+    temperature = input("Enter Temperature (Celcius): ")
     symptoms = input("Enter Symptoms (if any): ")
-    radiation_levels = float(input("Enter Radiation Levels (mSv): "))
+    radiation_levels = input("Enter Radiation Levels (mSv): ")
     blood_pressure = input("Enter Blood Pressure: ")
     record_date = input("Enter Record Date (YYYY-MM-DD): ")
 
     return weight, temperature, symptoms, radiation_levels, blood_pressure, record_date
 
 # Add records to database
-def add_health_record(astronaut_id, weight, temperature, symptoms, radiation_levels, blood_pressure, record_date):
+def add_health_record(key, astronaut_id, weight, temperature, symptoms, radiation_levels, blood_pressure, record_date):
+    # Encrypt input
+    encrypted_weight = encrypt_data(key, weight)
+    encrypted_temperature = encrypt_data(key, temperature)
+    encrypted_symptoms = encrypt_data(key, symptoms)
+    encrypted_radiation_levels = encrypt_data(key, radiation_levels)
+    encrypted_blood_pressure = encrypt_data(key, blood_pressure)
+
     # Connect to the database
     connect = sqlite3.connect('data/securespace.db')
     cursor = connect.cursor()
-
     # Insert the new record into the table
     cursor.execute('''
         INSERT INTO health_records (astronaut_id, weight, temperature, symptoms, radiation_levels, blood_pressure, record_date)
         VALUES (?, ?, ?, ?, ?, ?, ?)
-    ''', (astronaut_id, weight, temperature, symptoms, radiation_levels, blood_pressure, record_date))
+    ''', (astronaut_id, encrypted_weight, encrypted_temperature, encrypted_symptoms, encrypted_radiation_levels, encrypted_blood_pressure, record_date))
 
     # Commit changes and close the connection
     connect.commit()
@@ -77,15 +84,21 @@ def retrieve_record_details(astronaut_id, record_id):
     connect.close()
 
     if record:
+        decrypted_weight = decrypt_data(key, record[2])
+        decrypted_temperature = decrypt_data(key, record[3])
+        decrypted_symptoms = decrypt_data(key, record[4])
+        decrypted_radiation_levels = decrypt_data(key, record[5])
+        decrypted_blood_pressure = decrypt_data(key, record[6])
+
         print("\nRecord Details:")
         print("--------------")
         print(f"Record ID: {record[0]}")
         print(f"Astronaut ID: {record[1]}")
-        print(f"Weight: {record[2]}")
-        print(f"Temperature: {record[3]}")
-        print(f"Symptoms: {record[4]}")
-        print(f"Radiation Levels: {record[5]}")
-        print(f"Blood Pressure: {record[6]}")
+        print(f"Weight: {decrypted_weight}")
+        print(f"Temperature: {decrypted_temperature}")
+        print(f"Symptoms: {decrypted_symptoms}")
+        print(f"Radiation Levels: {decrypted_radiation_levels}")
+        print(f"Blood Pressure: {decrypted_blood_pressure}")
         print(f"Record Date: {record[7]}\n")
     else:
         print("No record found for this record ID.\n")
