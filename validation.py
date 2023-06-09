@@ -1,7 +1,7 @@
 from cryptography.fernet import Fernet
 
 # Generate encryption key
-key = Fernet.generate_key()
+key = b'JPlM7rSntFHxugRrW5LGV0Ojy32rG9cNtcTy-ZvXcgM='
 
 # Function to validate integers
 def validate_integer(variable):
@@ -25,8 +25,9 @@ def encrypt_data(key, data):
     encrypted_data = cipher.encrypt(data.encode())
     return encrypted_data
 
-def decrypt_data(key, data):
+def decrypt_data(key, encrypted_data):
     cipher = Fernet(key)
-    decrypted_data = cipher.decrypt(encrypt_data).decode()
+    decrypted_data = cipher.decrypt(encrypted_data).decode()
     return decrypted_data
+
 
